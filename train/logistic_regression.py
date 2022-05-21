@@ -3,12 +3,7 @@ import logging
 import mlflow.sklearn
 import mlflow
 from urllib.parse import urlparse
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.preprocessing import LabelEncoder
-from sklearn.linear_model import ElasticNet, LogisticRegression
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-# from pydrive.drive import GoogleAuth
+from sklearn.linear_model import LogisticRegression
 
 import numpy as np
 import pandas as pd
@@ -27,11 +22,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 
 from preprocess import Preprocess
 from ml import Ml
-# from ml import Ml
-# from ml import Ml
-# from preprocess import Preprocess
-# from preprocess import Preprocess
-# from ml import Ml
 
 ml = Ml()
 preprocess = Preprocess()
@@ -103,81 +93,80 @@ X.drop(['yes', 'no'], axis=1, inplace=True)
 X['day'] = X['date'].dt.dayofweek
 X.drop(["date"], axis=1, inplace=True)
 
-# >> ### Decision Tree Classifier
+# use logistic regression
+logistic_regression_model = LogisticRegression(random_state=0)
 
-decision_tree_model = DecisionTreeClassifier(criterion="entropy",
-                                             random_state=0)
-decision_tree_result = ml.cross_validation(decision_tree_model, X, y, 5)
+logistic_regression_result = ml.cross_validation(logistic_regression_model, X, y, 5)
 
 # Write scores to file
-with open("train/decission_metrics.txt", 'w') as outfile:
+with open("train/logistic_metrics.txt", 'w') as outfile:
     outfile.write(
-        f"Training data accuracy: {decision_tree_result['Training Accuracy scores'][0]}")
+        f"Training data accuracy: {logistic_regression_result['Training Accuracy scores'][0]}")
     outfile.write(
-        f"Validation data accuracy: {decision_tree_result['Validation Accuracy scores'][0]}")
+        f"Validation data accuracy: {logistic_regression_result['Validation Accuracy scores'][0]}")
 
 
 # Plot accuacy results to cml
 
 # Plot Accuracy Result
-model_name = "Decision Tree"
+model_name = "Logistic Regression"
 ml.plot_result(model_name, "Accuracy", "Accuracy scores in 5 Folds",
-               decision_tree_result["Training Accuracy scores"],
-               decision_tree_result["Validation Accuracy scores"],
-               'train/decision_tree_accuracy.png')
+               logistic_regression_result["Training Accuracy scores"],
+               logistic_regression_result["Validation Accuracy scores"],
+               'train/logistic_accuracy.png')
 
 # Precision Results
 
 # Plot Precision Result
 ml.plot_result(model_name, "Precision", "Precision scores in 5 Folds",
-               decision_tree_result["Training Precision scores"],
-               decision_tree_result["Validation Precision scores"],
-               'train/decision_tree_preicision.png')
+               logistic_regression_result["Training Precision scores"],
+               logistic_regression_result["Validation Precision scores"],
+               'train/logistic_preicision.png')
 
 # Recall Results plot
 
 # Plot Recall Result
 ml.plot_result(model_name, "Recall", "Recall scores in 5 Folds",
-               decision_tree_result["Training Recall scores"],
-               decision_tree_result["Validation Recall scores"],
-               'train/decision_tree_recall.png')
+               logistic_regression_result["Training Recall scores"],
+               logistic_regression_result["Validation Recall scores"],
+               'train/logistic_recall.png')
 
 
 # f1 Score Results
 
 # Plot F1-Score Result
 ml.plot_result(model_name, "F1", "F1 Scores in 5 Folds",
-               decision_tree_result["Training F1 scores"],
-               decision_tree_result["Validation F1 scores"],
-               'train/decision_tree_f1_score.png')
+               logistic_regression_result["Training F1 scores"],
+               logistic_regression_result["Validation F1 scores"],
+               'train/logistic_f1_score.png')
 
 
 # The model is overfitting as it is working well on the training data but not on the validation set.
 # We will adjust the min_samples_split hyperparameter to fix this.
 
 # Fine tunin the min_samples_split parameter
-# decision_tree_model_2 = DecisionTreeClassifier(criterion="entropy",
+# logistic_model_2 = Logistic(criterion="entropy",
 #                                                min_samples_split=4,
 #                                                random_state=0)
-# decision_tree_result_2 = ml.cross_validation(decision_tree_model_2, X, y, 5)
+# logistic_regression_result_2 = ml.cross_validation(logistic_model_2, X, y, 5)
 
 # # Plot Accuracy Result
 # ml.plot_result(model_name, "Accuracy", "Accuracy scores in 5 Folds",
-#                decision_tree_result_2["Training Accuracy scores"],
-#                decision_tree_result_2["Validation Accuracy scores"])
+#                logistic_regression_result_2["Training Accuracy scores"],
+#                logistic_regression_result_2["Validation Accuracy scores"])
 
 
 # # Plot Precision Result
 # ml.plot_result(model_name, "precision", "precision scores in 5 Folds",
-#                decision_tree_result_2["Training Precision scores"],
-#                decision_tree_result_2["Validation Precision scores"])
+#                logistic_regression_result_2["Training Precision scores"],
+#                logistic_regression_result_2["Validation Precision scores"])
 # # Plot Recall Result
 # ml.plot_result(model_name, "Recall", "Recall scores in 5 Folds",
-#                decision_tree_result_2["Training Recall scores"],
-#                decision_tree_result_2["Validation Recall scores"])
+#                logistic_regression_result_2["Training Recall scores"],
+#                logistic_regression_result_2["Validation Recall scores"])
 
 
 # # Plot F1-Score Result
 # ml.plot_result(model_name, "F1", "F1 Scores in 5 Folds",
-#                decision_tree_result_2["Training F1 scores"],
-#                decision_tree_result_2["Validation F1 scores"])
+#                logistic_regression_result_2["Training F1 scores"],
+#                logistic_regression_result_2["Validation F1 scores"])
