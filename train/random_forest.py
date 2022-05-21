@@ -1,8 +1,10 @@
+from random import random
 import sys
 import logging
 import mlflow.sklearn
 import mlflow
 from urllib.parse import urlparse
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import ElasticNet, LogisticRegression
@@ -27,6 +29,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 
 from preprocess import Preprocess
 from ml import Ml
+
 
 ml = Ml()
 preprocess = Preprocess()
@@ -98,81 +101,80 @@ X.drop(['yes', 'no'], axis=1, inplace=True)
 X['day'] = X['date'].dt.dayofweek
 X.drop(["date"], axis=1, inplace=True)
 
-# >> ### Decision Tree Classifier
+# IMport random forest model
+random_forest_model = RandomForestClassifier(n_estimators=100, random_state=0)
 
-decision_tree_model = DecisionTreeClassifier(criterion="entropy",
-                                             random_state=0)
-decision_tree_result = ml.cross_validation(decision_tree_model, X, y, 5)
+random_forest_result = ml.cross_validation(random_forest_model, X, y, 5)
 
 # Write scores to file
-with open("train/decission_metrics.txt", 'w') as outfile:
+with open("train/random_metrics.txt", 'w') as outfile:
     outfile.write(
-        f"Training data accuracy: {decision_tree_result['Training Accuracy scores'][0]}")
+        f"Training data accuracy: {random_forest_result['Training Accuracy scores'][0]}")
     outfile.write(
-        f"Validation data accuracy: {decision_tree_result['Validation Accuracy scores'][0]}")
+        f"Validation data accuracy: {random_forest_result['Validation Accuracy scores'][0]}")
 
 
 # Plot accuacy results to cml
 
 # Plot Accuracy Result
-model_name = "Decision Tree"
+model_name = "Random"
 ml.plot_result(model_name, "Accuracy", "Accuracy scores in 5 Folds",
-               decision_tree_result["Training Accuracy scores"],
-               decision_tree_result["Validation Accuracy scores"],
-               'train/decision_tree_accuracy.png')
+               random_forest_result["Training Accuracy scores"],
+               random_forest_result["Validation Accuracy scores"],
+               'train/random_forest_accuracy.png')
 
 # Precision Results
 
 # Plot Precision Result
 ml.plot_result(model_name, "Precision", "Precision scores in 5 Folds",
-               decision_tree_result["Training Precision scores"],
-               decision_tree_result["Validation Precision scores"],
-               'train/decision_tree_preicision.png')
+               random_forest_result["Training Precision scores"],
+               random_forest_result["Validation Precision scores"],
+               'train/random_forest_preicision.png')
 
 # Recall Results plot
 
 # Plot Recall Result
 ml.plot_result(model_name, "Recall", "Recall scores in 5 Folds",
-               decision_tree_result["Training Recall scores"],
-               decision_tree_result["Validation Recall scores"],
-               'train/decision_tree_recall.png')
+               random_forest_result["Training Recall scores"],
+               random_forest_result["Validation Recall scores"],
+               'train/random_forest_recall.png')
 
 
 # f1 Score Results
 
 # Plot F1-Score Result
 ml.plot_result(model_name, "F1", "F1 Scores in 5 Folds",
-               decision_tree_result["Training F1 scores"],
-               decision_tree_result["Validation F1 scores"],
-               'train/decision_tree_f1_score.png')
+               random_forest_result["Training F1 scores"],
+               random_forest_result["Validation F1 scores"],
+               'train/random_forest_f1_score.png')
 
 
 # The model is overfitting as it is working well on the training data but not on the validation set.
 # We will adjust the min_samples_split hyperparameter to fix this.
 
 # Fine tunin the min_samples_split parameter
-# decision_tree_model_2 = DecisionTreeClassifier(criterion="entropy",
+# random_forest_model_2 = DecisionTreeClassifier(criterion="entropy",
 #                                                min_samples_split=4,
 #                                                random_state=0)
-# decision_tree_result_2 = ml.cross_validation(decision_tree_model_2, X, y, 5)
+# random_forest_result_2 = ml.cross_validation(random_forest_model_2, X, y, 5)
 
 # # Plot Accuracy Result
 # ml.plot_result(model_name, "Accuracy", "Accuracy scores in 5 Folds",
-#                decision_tree_result_2["Training Accuracy scores"],
-#                decision_tree_result_2["Validation Accuracy scores"])
+#                random_forest_result_2["Training Accuracy scores"],
+#                random_forest_result_2["Validation Accuracy scores"])
 
 
 # # Plot Precision Result
 # ml.plot_result(model_name, "precision", "precision scores in 5 Folds",
-#                decision_tree_result_2["Training Precision scores"],
-#                decision_tree_result_2["Validation Precision scores"])
+#                random_forest_result_2["Training Precision scores"],
+#                random_forest_result_2["Validation Precision scores"])
 # # Plot Recall Result
 # ml.plot_result(model_name, "Recall", "Recall scores in 5 Folds",
-#                decision_tree_result_2["Training Recall scores"],
-#                decision_tree_result_2["Validation Recall scores"])
+#                random_forest_result_2["Training Recall scores"],
+#                random_forest_result_2["Validation Recall scores"])
 
 
 # # Plot F1-Score Result
 # ml.plot_result(model_name, "F1", "F1 Scores in 5 Folds",
-#                decision_tree_result_2["Training F1 scores"],
-#                decision_tree_result_2["Validation F1 scores"])
+#                random_forest_result_2["Training F1 scores"],
+#                random_forest_result_2["Validation F1 scores"])

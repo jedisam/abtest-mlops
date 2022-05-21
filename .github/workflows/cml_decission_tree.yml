@@ -41,6 +41,14 @@ jobs:
           cml-publish train/decision_tree_accuracy.png --md >> report.md
 
 
+          # Random Forest Classifier
+          echo "### Model Metrics" > report.md
+          cat train/random_metrics.txt >> report.md
+
+          echo "### Data Visualization" >> report.md
+          cml-publish train/random_forest_accuracy.png --md >> report.md
+
+
 
 
           cml-send-comment report.md
