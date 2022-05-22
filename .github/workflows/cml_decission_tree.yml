@@ -38,7 +38,7 @@ jobs:
 
           # python train/decisiontree.py
           # Decission Tree Classifier
-          echo "### Model Metrics" > report.md
+          echo "### Model Metrics" >> report.md
           # cat train/decission_metrics.txt >> report.md
 
           echo "### Data Visualization" >> report.md
@@ -47,14 +47,14 @@ jobs:
 
           # python train/random_forest.py
           # Random Forest Classifier
-          echo "### Model Metrics" > report.md
+          echo "### Model Metrics" >> report.md
           # cat train/random_metrics.txt >> report.md
 
           echo "### Data Visualization" >> report.md
           cml-publish train/random_forest_accuracy.png --md >> report.md
 
           # # XGBoost Classifier
-          # echo "### Model Metrics" > report.md
+          # echo "### Model Metrics" >> report.md
           # cat train/xgboost_metrics.txt >> report.md
 
           # echo "### Data Visualization" >> report.md
