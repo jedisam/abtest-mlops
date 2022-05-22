@@ -21,6 +21,8 @@ jobs:
           # Your ML workflow goes here
           pip install -r requirements.txt
           python train/logistic_regression.py
+          python train/decisiontree.py
+          python train/random_forest.py
           # python train/xgboost.py
       - name: Write CML report
         env:
@@ -34,7 +36,7 @@ jobs:
           echo "### Data Visualization" >> report.md
           cml-publish train/logistic_accuracy.png --md >> report.md
 
-          python train/decisiontree.py
+          # python train/decisiontree.py
           # Decission Tree Classifier
           echo "### Model Metrics" > report.md
           # cat train/decission_metrics.txt >> report.md
@@ -43,7 +45,7 @@ jobs:
           cml-publish train/decision_tree_accuracy.png --md >> report.md
 
 
-          python train/random_forest.py
+          # python train/random_forest.py
           # Random Forest Classifier
           echo "### Model Metrics" > report.md
           # cat train/random_metrics.txt >> report.md
