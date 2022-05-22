@@ -27,17 +27,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 
 from preprocess import Preprocess
 from ml import Ml
-# from ml import Ml
-# from ml import Ml
-# from preprocess import Preprocess
-# from preprocess import Preprocess
-# from ml import Ml
 
 ml = Ml()
 preprocess = Preprocess()
-
-# gauth = GoogleAuth()
-# gauth.LocalWebserverAuth()
 
 # path = 'data/AdSmartABdata.csv'
 # repo = 'https://github.com/abtesting10academy/abtest-mlops'
@@ -113,7 +105,7 @@ decision_tree_model = DecisionTreeClassifier(criterion="entropy",
 decision_tree_result = ml.cross_validation(decision_tree_model, X, y, 5)
 
 # Write scores to file
-with open("train/metrics.txt", 'w') as outfile:
+with open("train/decission_metrics.txt", 'w') as outfile:
     outfile.write(
         f"Training data accuracy: {decision_tree_result['Training Accuracy scores'][0]}")
     outfile.write(
