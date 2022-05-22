@@ -58,5 +58,4 @@ jobs:
           # echo "### Data Visualization" >> report.md
           # cml-publish train/xgboost_accuracy.png --md >> report.md
 
-
           cml-send-comment report.md
