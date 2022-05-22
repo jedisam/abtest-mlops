@@ -47,104 +47,113 @@ preprocess = Preprocess()
 # import AdSmartABdata.csv
 data = pd.read_csv('data/AdSmartABdata.csv', sep=',')
 
+mlflow.set_experiment('SmartAD data analysis')
 
-# change the date column to datetime
-data = preprocess.convert_to_datetime(data, 'date')
-numerical_column = preprocess.get_numerical_columns(data)
-categorical_column = preprocess.get_categorical_columns(data)
+if __name__ == '__main__':
+    warnings.filterwarnings("ignore")
+    mlflow.log_param('data_url', data)
+    mlflow.log_param('input_rows', data.shape[0])
+    mlflow.log_param('input_cols', data.shape[1])
+    mlflow.log_param('model_type', 'Decision Tree')
+    mlflow.log_param('model_parameters', 'n_estimators=100')
 
-# drop auction_id from categorical_column
-categorical_column.remove('auction_id')
+    # change the date column to datetime
+    data = preprocess.convert_to_datetime(data, 'date')
+    numerical_column = preprocess.get_numerical_columns(data)
+    categorical_column = preprocess.get_categorical_columns(data)
 
-# Get column names have less than 10 more than 2 unique values
-to_one_hot_encoding = [col for col in categorical_column if data[col].nunique(
-) <= 10 and data[col].nunique() > 2]
+    # drop auction_id from categorical_column
+    categorical_column.remove('auction_id')
 
-# Get Categorical Column names thoose are not in "to_one_hot_encoding"
-to_label_encoding = [
-    col for col in categorical_column if not col in to_one_hot_encoding]
+    # Get column names have less than 10 more than 2 unique values
+    to_one_hot_encoding = [col for col in categorical_column if data[col].nunique(
+    ) <= 10 and data[col].nunique() > 2]
 
-# Label encoding
-label_encoded_columns = preprocess.label_encode(data, to_label_encoding)
+    # Get Categorical Column names thoose are not in "to_one_hot_encoding"
+    to_label_encoding = [
+        col for col in categorical_column if not col in to_one_hot_encoding]
 
-# Select relevant rows
+    # Label encoding
+    label_encoded_columns = preprocess.label_encode(data, to_label_encoding)
 
-# Copy our DataFrame to X variable
-X = data.copy()
+    # Select relevant rows
 
-# Droping Categorical Columns,
-# "inplace" means replace our data with new one
-# Don't forget to "axis=1"
-X.drop(categorical_column, axis=1, inplace=True)
+    # Copy our DataFrame to X variable
+    X = data.copy()
 
-# Merge DataFrames
-X = pd.concat([X, label_encoded_columns], axis=1)
+    # Droping Categorical Columns,
+    # "inplace" means replace our data with new one
+    # Don't forget to "axis=1"
+    X.drop(categorical_column, axis=1, inplace=True)
 
-# Select only rows with responses
-X = X.query('yes == 1 | no == 1')
+    # Merge DataFrames
+    X = pd.concat([X, label_encoded_columns], axis=1)
 
-# Drop auction_id column
-X.drop(["auction_id"], axis=1, inplace=True)
+    # Select only rows with responses
+    X = X.query('yes == 1 | no == 1')
 
-# Split data
+    # Drop auction_id column
+    X.drop(["auction_id"], axis=1, inplace=True)
 
-X['target'] = [1] * X.shape[0]
-X.loc[X['no'] == 1, 'target'] = 0
-y = X['target']
-X.drop(["target"], axis=1, inplace=True)
-X.drop(['yes', 'no'], axis=1, inplace=True)
+    # Split data
 
-# Get the day of the week from the date column as a new column
-X['day'] = X['date'].dt.dayofweek
-X.drop(["date"], axis=1, inplace=True)
+    X['target'] = [1] * X.shape[0]
+    X.loc[X['no'] == 1, 'target'] = 0
+    y = X['target']
+    X.drop(["target"], axis=1, inplace=True)
+    X.drop(['yes', 'no'], axis=1, inplace=True)
 
-# >> ### Decision Tree Classifier
+    # Get the day of the week from the date column as a new column
+    X['day'] = X['date'].dt.dayofweek
+    X.drop(["date"], axis=1, inplace=True)
 
-decision_tree_model = DecisionTreeClassifier(criterion="entropy",
-                                             random_state=0)
-decision_tree_result = ml.cross_validation(decision_tree_model, X, y, 5)
+    # >> ### Decision Tree Classifier
 
-# Write scores to file
-with open("train/decission_metrics.txt", 'w') as outfile:
-    outfile.write(
-        f"Training data accuracy: {decision_tree_result['Training Accuracy scores'][0]}")
-    outfile.write(
-        f"Validation data accuracy: {decision_tree_result['Validation Accuracy scores'][0]}")
+    decision_tree_model = DecisionTreeClassifier(criterion="entropy",
+                                                random_state=0)
+    decision_tree_result = ml.cross_validation(decision_tree_model, X, y, 5)
 
-
-# Plot accuacy results to cml
-
-# Plot Accuracy Result
-model_name = "Decision Tree"
-ml.plot_result(model_name, "Accuracy", "Accuracy scores in 5 Folds",
-               decision_tree_result["Training Accuracy scores"],
-               decision_tree_result["Validation Accuracy scores"],
-               'train/decision_tree_accuracy.png')
-
-# Precision Results
-
-# Plot Precision Result
-ml.plot_result(model_name, "Precision", "Precision scores in 5 Folds",
-               decision_tree_result["Training Precision scores"],
-               decision_tree_result["Validation Precision scores"],
-               'train/decision_tree_preicision.png')
-
-# Recall Results plot
-
-# Plot Recall Result
-ml.plot_result(model_name, "Recall", "Recall scores in 5 Folds",
-               decision_tree_result["Training Recall scores"],
-               decision_tree_result["Validation Recall scores"],
-               'train/decision_tree_recall.png')
+    # Write scores to file
+    with open("train/decission_metrics.txt", 'w') as outfile:
+        outfile.write(
+            f"Training data accuracy: {decision_tree_result['Training Accuracy scores'][0]}")
+        outfile.write(
+            f"Validation data accuracy: {decision_tree_result['Validation Accuracy scores'][0]}")
 
 
-# f1 Score Results
+    # Plot accuacy results to cml
 
-# Plot F1-Score Result
-ml.plot_result(model_name, "F1", "F1 Scores in 5 Folds",
-               decision_tree_result["Training F1 scores"],
-               decision_tree_result["Validation F1 scores"],
-               'train/decision_tree_f1_score.png')
+    # Plot Accuracy Result
+    model_name = "Decision Tree"
+    ml.plot_result(model_name, "Accuracy", "Accuracy scores in 5 Folds",
+                decision_tree_result["Training Accuracy scores"],
+                decision_tree_result["Validation Accuracy scores"],
+                'train/decision_tree_accuracy.png')
+
+    # Precision Results
+
+    # Plot Precision Result
+    ml.plot_result(model_name, "Precision", "Precision scores in 5 Folds",
+                decision_tree_result["Training Precision scores"],
+                decision_tree_result["Validation Precision scores"],
+                'train/decision_tree_preicision.png')
+
+    # Recall Results plot
+
+    # Plot Recall Result
+    ml.plot_result(model_name, "Recall", "Recall scores in 5 Folds",
+                decision_tree_result["Training Recall scores"],
+                decision_tree_result["Validation Recall scores"],
+                'train/decision_tree_recall.png')
+
+
+    # f1 Score Results
+
+    # Plot F1-Score Result
+    ml.plot_result(model_name, "F1", "F1 Scores in 5 Folds",
+                decision_tree_result["Training F1 scores"],
+                decision_tree_result["Validation F1 scores"],
+                'train/decision_tree_f1_score.png')
 
 
 # The model is overfitting as it is working well on the training data but not on the validation set.

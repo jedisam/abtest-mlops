@@ -1,0 +1,4 @@
+artifact_location: file:///home/jedi/Documents/Tenacademy/Week2/abtest-mlops/mlruns/1
+experiment_id: '1'
+lifecycle_stage: active
+name: SmartAD data analysis
